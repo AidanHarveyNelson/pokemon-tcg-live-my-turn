@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>MyTurnMod</AssemblyName>
+    <RootNamespace>MyTurnMod</RootNamespace>
+    <!--
+      Copy to output = false: MelonLoader loads the DLL from the Mods folder.
+      The game and MelonLoader assemblies are already loaded at runtime.
+    -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MyTurnMod.Core\MyTurnMod.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    MelonLoader & Harmony — copy these from your game directory after installing MelonLoader:
+      <GameDir>/MelonLoader/net6/MelonLoader.dll
+      <GameDir>/MelonLoader/net6/0Harmony.dll
+    Then place them in libs/MelonLoader/ and commit.
+  -->
+  <ItemGroup>
+    <Reference Include="MelonLoader">
+      <HintPath>..\..\libs\MelonLoader\MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\libs\MelonLoader\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Game assemblies — after installing MelonLoader, copy these from:
+      <GameDir>/MelonLoader/Il2CppAssemblies/  (for IL2CPP builds)
+    The key file is Assembly-CSharp.dll. Add more as needed.
+    Decompile with dnSpy or ILSpy to find the turn management classes.
+  -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\libs\Game\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

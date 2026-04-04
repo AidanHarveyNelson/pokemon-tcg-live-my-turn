@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release
+    # Must run on macOS so the game DLLs in libs/ (committed to the repo) are present.
+    # The game itself only runs on macOS for now.
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore MyTurnMod.sln
+
+      - name: Build Core & Tests
+        run: |
+          dotnet build src/MyTurnMod.Core/MyTurnMod.Core.csproj -c Release --no-restore
+          dotnet build tests/MyTurnMod.Tests/MyTurnMod.Tests.csproj -c Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test tests/MyTurnMod.Tests/MyTurnMod.Tests.csproj -c Release --no-restore --verbosity normal
+
+      - name: Build Mod
+        run: |
+          dotnet build src/MyTurnMod/MyTurnMod.csproj -c Release --no-restore \
+            -o ./release-output
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./release-output/MyTurnMod.dll
+          generate_release_notes: true
+          fail_on_unmatched_files: true

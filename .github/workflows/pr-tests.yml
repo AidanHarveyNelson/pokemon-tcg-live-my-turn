@@ -1,0 +1,31 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        # Only restore the Core lib and Tests — the main mod needs game DLLs
+        # which are platform-specific and large; they are only needed for releases.
+        run: |
+          dotnet restore src/MyTurnMod.Core/MyTurnMod.Core.csproj
+          dotnet restore tests/MyTurnMod.Tests/MyTurnMod.Tests.csproj
+
+      - name: Build Core
+        run: dotnet build src/MyTurnMod.Core/MyTurnMod.Core.csproj --no-restore -c Release
+
+      - name: Run Tests
+        run: dotnet test tests/MyTurnMod.Tests/MyTurnMod.Tests.csproj --no-restore -c Release --verbosity normal
