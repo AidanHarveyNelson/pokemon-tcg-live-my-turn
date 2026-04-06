@@ -1,32 +1,30 @@
+using System.Reflection;
 using HarmonyLib;
 using MelonLoader;
 
 namespace MyTurnMod.Hooks;
 
 /// <summary>
-/// Harmony patches that detect turn changes in Pokemon TCG Live.
+/// Harmony patch that detects turn changes in Pokemon TCG Live.
 ///
-/// HOW TO FIND THE RIGHT CLASS AND METHOD NAMES:
-///   1. Install dnSpy or ILSpy.
-///   2. Open the Il2CppAssemblies version of Assembly-CSharp.dll
-///      (found at: &lt;GameDir&gt;/MelonLoader/Il2CppAssemblies/Assembly-CSharp.dll after running the game with MelonLoader once).
-///   3. Search for classes related to turns — try "TurnManager", "GameController",
-///      "PhaseManager", "BattleController", or similar.
-///   4. Look for a method called when the local player's turn starts, e.g.
-///      "BeginPlayerTurn", "StartTurn", "OnTurnStart".
-///   5. Update <see cref="TurnManagerTypeName"/> and <see cref="BeginTurnMethodName"/> below.
-///   6. If the begin-turn method receives a player parameter, add a check to confirm
-///      it is the local player before calling SetTurnState(MyTurn).
+/// Hooks into <c>MatchManager.SetState(MatchManager.MatchState)</c>, which is the
+/// single call-site that transitions the match state for both players.
+///
+/// <c>MatchManager.MatchState</c> enum (Assembly-CSharp.dll):
+///   None        = 0
+///   Setup       = 1
+///   LocalTurn   = 2  ← local player's turn started
+///   OpponentTurn = 3  ← opponent's turn started
 /// </summary>
 internal static class TurnHook
 {
-    // -------------------------------------------------------------------------
-    // TODO: Replace these with the real class/method names from the game.
-    // -------------------------------------------------------------------------
-    private const string TurnManagerTypeName = "GameTurnManager";
-    private const string BeginTurnMethodName = "BeginPlayerTurn";
-    private const string EndTurnMethodName   = "EndPlayerTurn";
-    // -------------------------------------------------------------------------
+    private const string MatchManagerTypeName = "MatchManager";
+    private const string SetStateMethodName   = "SetState";
+
+    // Int values of MatchManager.MatchState (verified via Mono.Cecil inspection).
+    private const int StateLocalTurn    = 2;
+    private const int StateOpponentTurn = 3;
+    private const int StateSetup        = 1;
 
     private static TurnStateTracker? _tracker;
 
@@ -34,61 +32,88 @@ internal static class TurnHook
     {
         _tracker = tracker;
 
-        // Find types by name so we don't need a compile-time reference to Assembly-CSharp.
-        var allTypes = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(a =>
-            {
-                try { return a.GetTypes(); }
-                catch { return Array.Empty<Type>(); }
-            });
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        MelonLogger.Msg($"[MyTurnMod] Scanning {assemblies.Length} loaded assemblies for '{MatchManagerTypeName}'...");
 
-        var turnManagerType = allTypes.FirstOrDefault(t => t.Name == TurnManagerTypeName);
-        if (turnManagerType is null)
+        // Find the type by name so we don't need a compile-time reference to Assembly-CSharp.
+        var allTypes = assemblies.SelectMany(a =>
         {
-            MelonLogger.Warning(
-                $"[MyTurnMod] Could not find type '{TurnManagerTypeName}'. " +
-                "Open TurnHook.cs and update TurnManagerTypeName with the correct class name.");
+            try { return a.GetTypes(); }
+            catch (ReflectionTypeLoadException ex)
+            {
+                MelonLogger.Warning(
+                    $"[MyTurnMod] Could not load all types from '{a.GetName().Name}': " +
+                    $"{ex.LoaderExceptions.FirstOrDefault()?.Message}");
+                return ex.Types.Where(t => t is not null)!;
+            }
+            catch (Exception ex)
+            {
+                MelonLogger.Warning($"[MyTurnMod] Skipped assembly '{a.GetName().Name}': {ex.Message}");
+                return Array.Empty<Type>();
+            }
+        });
+
+        var matchManagerType = allTypes.FirstOrDefault(t => t.Name == MatchManagerTypeName);
+        if (matchManagerType is null)
+        {
+            MelonLogger.Error(
+                $"[MyTurnMod] Could not find type '{MatchManagerTypeName}'. " +
+                "Turn detection will not work. " +
+                "Check that Assembly-CSharp.dll is loaded and the class name is still 'MatchManager'.");
             return;
         }
 
-        PatchMethod(harmony, turnManagerType, BeginTurnMethodName, nameof(Postfix_BeginTurn));
-        PatchMethod(harmony, turnManagerType, EndTurnMethodName,   nameof(Postfix_EndTurn));
-    }
+        MelonLogger.Msg($"[MyTurnMod] Found '{MatchManagerTypeName}' in '{matchManagerType.Assembly.GetName().Name}'.");
 
-    private static void PatchMethod(
-        HarmonyLib.Harmony harmony, Type targetType, string methodName, string patchMethodName)
-    {
-        var method = AccessTools.Method(targetType, methodName);
+        var method = AccessTools.Method(matchManagerType, SetStateMethodName);
         if (method is null)
         {
-            MelonLogger.Warning(
-                $"[MyTurnMod] Could not find method '{methodName}' on '{targetType.Name}'. " +
-                "Update TurnHook.cs with the correct method name.");
+            // Log all public methods to help diagnose a rename.
+            var methodNames = string.Join(", ",
+                matchManagerType.GetMethods(
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.Static   |
+                    System.Reflection.BindingFlags.Public   |
+                    System.Reflection.BindingFlags.NonPublic)
+                .Select(m => m.Name)
+                .Distinct()
+                .OrderBy(n => n));
+            MelonLogger.Error(
+                $"[MyTurnMod] Could not find method '{SetStateMethodName}' on '{MatchManagerTypeName}'. " +
+                $"Available methods: {methodNames}");
             return;
         }
 
-        harmony.Patch(method, postfix: new HarmonyMethod(typeof(TurnHook), patchMethodName));
-        MelonLogger.Msg($"[MyTurnMod] Patched {targetType.Name}.{methodName}");
+        MelonLogger.Msg(
+            $"[MyTurnMod] Found '{MatchManagerTypeName}.{SetStateMethodName}' " +
+            $"({string.Join(", ", method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}"))}).");
+
+        try
+        {
+            harmony.Patch(method, postfix: new HarmonyMethod(typeof(TurnHook), nameof(Postfix_SetState)));
+            MelonLogger.Msg($"[MyTurnMod] Successfully patched {MatchManagerTypeName}.{SetStateMethodName}.");
+        }
+        catch (Exception ex)
+        {
+            MelonLogger.Error($"[MyTurnMod] Failed to apply Harmony patch: {ex}");
+        }
     }
 
-    // -------------------------------------------------------------------------
-    // TODO: If BeginPlayerTurn receives a player parameter, add it here and
-    //       check that it is the local player before changing state, e.g.:
-    //
-    //   private static void Postfix_BeginTurn(PlayerObject player)
-    //   {
-    //       if (player != LocalPlayerManager.Instance.LocalPlayer) return;
-    //       _tracker?.SetTurnState(TurnState.MyTurn);
-    //   }
-    // -------------------------------------------------------------------------
-
-    private static void Postfix_BeginTurn()
+    /// <summary>
+    /// Called after <c>MatchManager.SetState</c>. <paramref name="__0"/> is the first argument
+    /// (the new <c>MatchState</c> value) captured as its underlying <see langword="int"/>.
+    /// </summary>
+    private static void Postfix_SetState(int __0)
     {
-        _tracker?.SetTurnState(TurnState.MyTurn);
-    }
+        MelonLogger.Msg($"[MyTurnMod] MatchManager.SetState called with state={__0}.");
 
-    private static void Postfix_EndTurn()
-    {
-        _tracker?.SetTurnState(TurnState.OpponentTurn);
+        if (__0 == StateLocalTurn)
+            _tracker?.SetTurnState(TurnState.MyTurn);
+        else if (__0 == StateOpponentTurn)
+            _tracker?.SetTurnState(TurnState.OpponentTurn);
+        else if (__0 == StateSetup)
+            _tracker?.SetTurnState(TurnState.Unknown);
+        else
+            MelonLogger.Msg($"[MyTurnMod] Unhandled state value {__0} — no turn-state change.");
     }
 }

@@ -11,7 +11,7 @@ public class WindowNotifierTests
     [Fact]
     public void Create_ReturnsNonNull()
     {
-        var notifier = WindowNotifier.Create();
+        var notifier = WindowNotifierFactory.Create();
         Assert.NotNull(notifier);
     }
 
@@ -21,7 +21,7 @@ public class WindowNotifierTests
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             return;
 
-        var notifier = WindowNotifier.Create();
+        var notifier = WindowNotifierFactory.Create();
         Assert.IsType<MacWindowNotifier>(notifier);
     }
 
@@ -31,7 +31,7 @@ public class WindowNotifierTests
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
-        var notifier = WindowNotifier.Create();
+        var notifier = WindowNotifierFactory.Create();
         Assert.IsType<WindowsWindowNotifier>(notifier);
     }
 
@@ -41,7 +41,7 @@ public class WindowNotifierTests
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             return;
 
-        var notifier = WindowNotifier.Create();
+        var notifier = WindowNotifierFactory.Create();
         Assert.IsType<LinuxWindowNotifier>(notifier);
     }
 
@@ -55,7 +55,7 @@ public class WindowNotifierTests
             return;
 
         string? warnMessage = null;
-        WindowNotifier.Create(warn => warnMessage = warn);
+        WindowNotifierFactory.Create(warn => warnMessage = warn);
 
         Assert.Null(warnMessage);
     }
