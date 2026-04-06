@@ -24,6 +24,10 @@ A [MelonLoader](https://melonwiki.xyz/) mod for **Pokemon TCG Live** that notifi
 
 Change the value and restart the game to apply.
 
+## Developer Notes/FAQ
+- Q: I'm getting error `Failed to Open Mono Assembly`:
+  - A: This error is caused by the MelonLoader program being unable to read the `é` in the word "Pokémon". This can be fixed by changing your PTCGL client's folder to something else I.E. `PTCGL`
+
 ## Roadmap
 
 - [x] Windows support (`FlashWindowEx` / `SetForegroundWindow`)

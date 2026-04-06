@@ -44,17 +44,18 @@ internal class SettingsOverlay
     {
         if (!_isVisible) return;
 
-        var panelRect = new Rect(10, 10, 280, 86);
+        var panelRect = new Rect(10, 10, 300, 120);
 
         var prevColor = GUI.color;
         GUI.color = new Color(0f, 0f, 0f, 0.7f);
         GUI.DrawTexture(panelRect, Texture2D.whiteTexture);
         GUI.color = prevColor;
 
-        GUILayout.BeginArea(new Rect(18, 16, 264, 74));
+        GUILayout.BeginArea(new Rect(18, 16, 284, 104));
         GUILayout.Label("MyTurnMod Settings");
         GUILayout.Label($"Notification:  {NotificationType}");
-        GUILayout.Label("[F1] cycle type   [F7] hide overlay");
+        GUILayout.Label("[F1] cycle notification type");
+        GUILayout.Label("[F7] hide overlay");
         GUILayout.EndArea();
     }
 }

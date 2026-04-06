@@ -10,7 +10,7 @@ namespace MyTurnMod.Platform;
 /// implementation. All calling code works against <see cref="IWindowNotifier"/> only and
 /// has no knowledge of the underlying platform.
 /// </summary>
-public static class WindowNotifier
+public static class WindowNotifierFactory
 {
     /// <summary>
     /// Creates the correct notifier for the running OS.

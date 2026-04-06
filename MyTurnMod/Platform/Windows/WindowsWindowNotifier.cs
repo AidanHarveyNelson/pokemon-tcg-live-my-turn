@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using MyTurnMod.Platform;
 
 namespace MyTurnMod.Platform.Windows;
 
@@ -12,38 +11,27 @@ public class WindowsWindowNotifier : IWindowNotifier
     [StructLayout(LayoutKind.Sequential)]
     private struct FLASHWINFO
     {
-        public uint cbSize;
+        public uint   cbSize;
         public IntPtr hwnd;
-        public uint dwFlags;
-        public uint uCount;
-        public uint dwTimeout;
+        public uint   dwFlags;
+        public uint   uCount;
+        public uint   dwTimeout;
     }
 
-    // dwFlags values
-    private const uint FLASHW_STOP = 0;
-    private const uint FLASHW_CAPTION = 1;
-    private const uint FLASHW_TRAY = 2;
-    private const uint FLASHW_ALL = FLASHW_CAPTION | FLASHW_TRAY;
-    private const uint FLASHW_TIMER = 4;    // flash continuously until stopped
+    private const uint FLASHW_CAPTION   = 1;
+    private const uint FLASHW_TRAY      = 2;
+    private const uint FLASHW_ALL       = FLASHW_CAPTION | FLASHW_TRAY;
     private const uint FLASHW_TIMERNOFG = 12; // flash until the window comes to the foreground
 
-    [DllImport("user32.dll")]
-    private static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-    [DllImport("kernel32.dll")]
-    private static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] private static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
+    [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
+    [DllImport("user32.dll")] private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
     private static IntPtr GetGameWindow()
-    {
-        var process = System.Diagnostics.Process.GetCurrentProcess();
-        return process.MainWindowHandle;
-    }
+        => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 
     /// <summary>Flashes the taskbar button until the user focuses the window.</summary>
     public void FlashDock()
@@ -53,10 +41,10 @@ public class WindowsWindowNotifier : IWindowNotifier
 
         var info = new FLASHWINFO
         {
-            cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
-            hwnd = hwnd,
-            dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG,
-            uCount = uint.MaxValue,
+            cbSize    = (uint)Marshal.SizeOf<FLASHWINFO>(),
+            hwnd      = hwnd,
+            dwFlags   = FLASHW_ALL | FLASHW_TIMERNOFG,
+            uCount    = uint.MaxValue,
             dwTimeout = 0,
         };
         FlashWindowEx(ref info);
@@ -69,6 +57,16 @@ public class WindowsWindowNotifier : IWindowNotifier
         if (hwnd == IntPtr.Zero) return;
 
         ShowWindow(hwnd, 9 /* SW_RESTORE */);
+
+        // AttachThreadInput grants the game window's thread foreground permission
+        // so SetForegroundWindow isn't silently blocked by Windows.
+        uint fgThread     = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
+        uint targetThread = GetWindowThreadProcessId(hwnd, IntPtr.Zero);
+        bool attached     = fgThread != targetThread && fgThread != 0;
+
+        if (attached) AttachThreadInput(targetThread, fgThread, true);
         SetForegroundWindow(hwnd);
+        if (attached) AttachThreadInput(targetThread, fgThread, false);
     }
 }
+

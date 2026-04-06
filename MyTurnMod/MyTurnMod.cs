@@ -16,7 +16,7 @@ public class MyTurnMod : MelonMod
     public override void OnInitializeMelon()
     {
         _overlay = new SettingsOverlay();
-        _notifier = WindowNotifier.Create(warn => LoggerInstance.Warning(warn));
+        _notifier = WindowNotifierFactory.Create(warn => LoggerInstance.Warning(warn));
 
         TurnTracker.OnMyTurnStarted += HandleMyTurnStarted;
 
@@ -36,11 +36,13 @@ public class MyTurnMod : MelonMod
     private void HandleMyTurnStarted()
     {
         switch (_overlay.NotificationType)
-        {
+        {   
             case NotificationType.FlashDock:
+                LoggerInstance.Msg("Flashing Dock...");
                 _notifier.FlashDock();
                 break;
             case NotificationType.BringToFront:
+                LoggerInstance.Msg("Bringing window to front...");
                 _notifier.BringToFront();
                 break;
         }

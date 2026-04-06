@@ -29,7 +29,7 @@
     <Compile Include="..\..\MyTurnMod\TurnState.cs" />
     <Compile Include="..\..\MyTurnMod\TurnStateTracker.cs" />
     <Compile Include="..\..\MyTurnMod\Platform\IWindowNotifier.cs" />
-    <Compile Include="..\..\MyTurnMod\Platform\WindowNotifier.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\WindowNotifierFactory.cs" />
     <Compile Include="..\..\MyTurnMod\Platform\NoOpWindowNotifier.cs" />
     <Compile Include="..\..\MyTurnMod\Platform\Mac\INativeAppBridge.cs" />
     <Compile Include="..\..\MyTurnMod\Platform\Mac\MacWindowNotifier.cs" />
