@@ -33,7 +33,9 @@ internal static class TurnHook
         _tracker = tracker;
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+#if DEBUG
         MelonLogger.Msg($"[MyTurnMod] Scanning {assemblies.Length} loaded assemblies for '{MatchManagerTypeName}'...");
+#endif
 
         // Find the type by name so we don't need a compile-time reference to Assembly-CSharp.
         var allTypes = assemblies.SelectMany(a =>
@@ -63,18 +65,20 @@ internal static class TurnHook
             return;
         }
 
+#if DEBUG
         MelonLogger.Msg($"[MyTurnMod] Found '{MatchManagerTypeName}' in '{matchManagerType.Assembly.GetName().Name}'.");
+#endif
 
         var method = AccessTools.Method(matchManagerType, SetStateMethodName);
         if (method is null)
         {
-            // Log all public methods to help diagnose a rename.
+            // Log all methods to help diagnose a rename.
             var methodNames = string.Join(", ",
                 matchManagerType.GetMethods(
-                    System.Reflection.BindingFlags.Instance |
-                    System.Reflection.BindingFlags.Static   |
-                    System.Reflection.BindingFlags.Public   |
-                    System.Reflection.BindingFlags.NonPublic)
+                    BindingFlags.Instance |
+                    BindingFlags.Static   |
+                    BindingFlags.Public   |
+                    BindingFlags.NonPublic)
                 .Select(m => m.Name)
                 .Distinct()
                 .OrderBy(n => n));
@@ -84,14 +88,18 @@ internal static class TurnHook
             return;
         }
 
+#if DEBUG
         MelonLogger.Msg(
             $"[MyTurnMod] Found '{MatchManagerTypeName}.{SetStateMethodName}' " +
             $"({string.Join(", ", method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}"))}).");
+#endif
 
         try
         {
             harmony.Patch(method, postfix: new HarmonyMethod(typeof(TurnHook), nameof(Postfix_SetState)));
+#if DEBUG
             MelonLogger.Msg($"[MyTurnMod] Successfully patched {MatchManagerTypeName}.{SetStateMethodName}.");
+#endif
         }
         catch (Exception ex)
         {
@@ -105,7 +113,9 @@ internal static class TurnHook
     /// </summary>
     private static void Postfix_SetState(int __0)
     {
+#if DEBUG
         MelonLogger.Msg($"[MyTurnMod] MatchManager.SetState called with state={__0}.");
+#endif
 
         if (__0 == StateLocalTurn)
             _tracker?.SetTurnState(TurnState.MyTurn);
@@ -113,7 +123,9 @@ internal static class TurnHook
             _tracker?.SetTurnState(TurnState.OpponentTurn);
         else if (__0 == StateSetup)
             _tracker?.SetTurnState(TurnState.Unknown);
+#if DEBUG
         else
             MelonLogger.Msg($"[MyTurnMod] Unhandled state value {__0} — no turn-state change.");
+#endif
     }
 }
