@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>MyTurnMod</AssemblyName>
+    <RootNamespace>MyTurnMod</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <ProjectGuid>{f2e6ad78-8072-47fa-924f-d625fcfbdf09}</ProjectGuid>
+    <!--
+      Do not copy game/MelonLoader DLLs to output — they are already loaded by
+      the game at runtime. MelonLoader loads the mod DLL from the Mods folder.
+    -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <!--
+      Suppress SDK auto-generation of AssemblyTitle, AssemblyVersion, etc.
+      Those attributes (plus MelonInfo/MelonGame) are defined in Properties\AssemblyInfo.cs.
+    -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Mods\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!--
+    MelonLoader & Harmony — located in the net6 subfolder of the MelonLoader install.
+  -->
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\MelonLoader\net6\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\MelonLoader\net6\MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Game assemblies from Pokemon TCG Live_Data\Managed.
+    Decompile Assembly-CSharp.dll with dnSpy or ILSpy to locate turn-management classes.
+  -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="CardDatabase.DataAccess">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\CardDatabase.DataAccess.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RainierClientSDK">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\RainierClientSDK.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SharedLogicUtils">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\SharedLogicUtils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>C:\Users\Skynet\The Pokémon Company International\Pokémon Trading Card Game Live\Pokemon TCG Live_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
+

@@ -1,4 +1,4 @@
-namespace MyTurnMod.Core.Platform;
+namespace MyTurnMod.Platform.Mac;
 
 /// <summary>
 /// Abstraction over OS-native calls so <see cref="MacWindowNotifier"/> can be unit-tested

@@ -1,4 +1,4 @@
-using MyTurnMod.Core;
+using MyTurnMod;
 
 namespace MyTurnMod.Tests;
 

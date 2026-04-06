@@ -1,8 +1,7 @@
 using HarmonyLib;
 using MelonLoader;
-using MyTurnMod.Core;
 
-namespace MyTurnMod;
+namespace MyTurnMod.Hooks;
 
 /// <summary>
 /// Harmony patches that detect turn changes in Pokemon TCG Live.

@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace MyTurnMod.Core.Platform;
+namespace MyTurnMod.Platform.Mac;
 
 /// <summary>
 /// Calls into the macOS Objective-C runtime to control NSApplication.
@@ -11,7 +11,7 @@ internal class ObjcRuntimeBridge : INativeAppBridge
     private const string ObjcLib = "/usr/lib/libobjc.dylib";
 
     // NSRequestUserAttentionType constants
-    private const nint NSCriticalRequest = 0;      // bounces until focused
+    private const nint NSCriticalRequest = 0;       // bounces until focused
     private const nint NSInformationalRequest = 10; // bounces once
 
     [DllImport(ObjcLib, EntryPoint = "objc_getClass")]

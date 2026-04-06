@@ -1,4 +1,6 @@
-namespace MyTurnMod.Core.Platform;
+using MyTurnMod.Platform;
+
+namespace MyTurnMod.Platform.Mac;
 
 public class MacWindowNotifier : IWindowNotifier
 {

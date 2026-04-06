@@ -1,4 +1,4 @@
-namespace MyTurnMod.Core.Platform;
+namespace MyTurnMod.Platform;
 
 public interface IWindowNotifier
 {

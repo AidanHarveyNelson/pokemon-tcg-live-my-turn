@@ -1,10 +1,8 @@
 using MelonLoader;
-using MyTurnMod.Core;
-using MyTurnMod.Core.Config;
-using MyTurnMod.Core.Platform;
-
-[assembly: MelonInfo(typeof(MyTurnMod.MyTurnMod), "MyTurnMod", "1.0.0", "YourName")]
-[assembly: MelonGame("PTCGL", "Pokemon TCG Live")]
+using MyTurnMod.Hooks;
+using MyTurnMod.Platform;
+using MyTurnMod.UI;
+using UnityEngine;
 
 namespace MyTurnMod;
 
@@ -12,24 +10,32 @@ public class MyTurnMod : MelonMod
 {
     internal static TurnStateTracker TurnTracker { get; } = new();
 
-    private IModConfig _config = null!;
     private IWindowNotifier _notifier = null!;
+    private SettingsOverlay _overlay = null!;
 
     public override void OnInitializeMelon()
     {
-        _config = new ModConfig();
-        _notifier = NotifierFactory.Create(warn => LoggerInstance.Warning(warn));
+        _overlay = new SettingsOverlay();
+        _notifier = WindowNotifier.Create(warn => LoggerInstance.Warning(warn));
 
         TurnTracker.OnMyTurnStarted += HandleMyTurnStarted;
 
         TurnHook.Initialize(HarmonyInstance, TurnTracker);
 
-        LoggerInstance.Msg("MyTurnMod loaded. Watching for your turn...");
+        LoggerInstance.Msg("MyTurnMod loaded. Press F7 to toggle the settings overlay.");
     }
+
+    public override void OnUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.F1)) _overlay.CycleNotificationType();
+        if (Input.GetKeyDown(KeyCode.F7)) _overlay.ToggleVisibility();
+    }
+
+    public override void OnGUI() => _overlay.Draw();
 
     private void HandleMyTurnStarted()
     {
-        switch (_config.NotificationType)
+        switch (_overlay.NotificationType)
         {
             case NotificationType.FlashDock:
                 _notifier.FlashDock();

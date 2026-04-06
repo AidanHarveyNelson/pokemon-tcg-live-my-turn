@@ -1,5 +1,5 @@
 using Moq;
-using MyTurnMod.Core.Platform;
+using MyTurnMod.Platform.Mac;
 
 namespace MyTurnMod.Tests;
 

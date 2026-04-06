@@ -1,4 +1,4 @@
-namespace MyTurnMod.Core;
+namespace MyTurnMod;
 
 public enum NotificationType
 {

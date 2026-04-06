@@ -1,4 +1,4 @@
-namespace MyTurnMod.Core;
+namespace MyTurnMod;
 
 /// <summary>
 /// Tracks the current turn state and raises an event when the local player's turn begins.

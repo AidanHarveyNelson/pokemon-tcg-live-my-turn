@@ -1,4 +1,4 @@
-namespace MyTurnMod.Core.Platform;
+namespace MyTurnMod.Platform;
 
 /// <summary>
 /// Fallback notifier for unsupported platforms. Does nothing.

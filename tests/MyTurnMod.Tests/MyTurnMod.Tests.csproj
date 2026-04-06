@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -19,8 +19,23 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!--
+    The test project directly compiles the pure-logic source files so it doesn't
+    need MelonLoader or game assembly references. This keeps tests runnable on any
+    machine without a game install.
+  -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MyTurnMod.Core\MyTurnMod.Core.csproj" />
+    <Compile Include="..\..\MyTurnMod\NotificationType.cs" />
+    <Compile Include="..\..\MyTurnMod\TurnState.cs" />
+    <Compile Include="..\..\MyTurnMod\TurnStateTracker.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\IWindowNotifier.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\WindowNotifier.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\NoOpWindowNotifier.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\Mac\INativeAppBridge.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\Mac\MacWindowNotifier.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\Mac\ObjcRuntimeBridge.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\Windows\WindowsWindowNotifier.cs" />
+    <Compile Include="..\..\MyTurnMod\Platform\Linux\LinuxWindowNotifier.cs" />
   </ItemGroup>
 
 </Project>
