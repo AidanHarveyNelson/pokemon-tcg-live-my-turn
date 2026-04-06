@@ -3,15 +3,15 @@ using System.Runtime.InteropServices;
 using MelonLoader;
 using MyTurnMod;
 
-[assembly: MelonInfo(typeof(MyTurnMod.MyTurnMod), "MyTurnMod", "1.0.0", "YourName")]
-[assembly: MelonGame("PTCGL", "Pokemon TCG Live")]
+[assembly: MelonInfo(typeof(MyTurnMod.MyTurnMod), "MyTurnMod", "1.0.0", "MyTurnMod Team")]
+[assembly: MelonGame("pokemon", "Pokemon TCG Live")]
 
 [assembly: AssemblyTitle("MyTurnMod")]
 [assembly: AssemblyDescription("Notifies you when it is your turn in Pokemon TCG Live.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MyTurnMod")]
-[assembly: AssemblyCopyright("Copyright © 2024")]
+[assembly: AssemblyCopyright("Copyright © 2024 MyTurnMod Team")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
